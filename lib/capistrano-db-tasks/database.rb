@@ -1,4 +1,3 @@
-require 'active_record'
 module Database
   class Base
     DBCONFIG_BEGIN_FLAG = "__CAPISTRANODB_CONFIG_BEGIN_FLAG__".freeze
@@ -20,7 +19,7 @@ module Database
 
     def credentials
       credential_params = ""
-      username = "postgres"
+      username = @config['username'] || @config['user']
 
       if mysql?
         credential_params << " -u #{username} " if username
@@ -35,6 +34,27 @@ module Database
       end
 
       credential_params
+    end
+
+    def remote_credentials
+
+      credential_params = ""
+      remote_db_username = @cap.fetch(:remote_db_username, [])
+
+      if mysql?
+        credential_params << " -u #{username} " if username
+        credential_params << " -p'#{@config['password']}' " if @config['password']
+        credential_params << " -h #{@config['host']} " if @config['host']
+        credential_params << " -S #{@config['socket']} " if @config['socket']
+        credential_params << " -P #{@config['port']} " if @config['port']
+      elsif postgresql?
+        credential_params << " -U #{remote_db_username} " if remote_db_username
+        credential_params << " -h #{@config['host']} " if @config['host']
+        credential_params << " -p #{@config['port']} " if @config['port']
+      end
+
+      credential_params
+
     end
 
     def database
@@ -67,7 +87,7 @@ module Database
       if mysql?
         "mysqldump #{credentials} #{database} #{dump_cmd_opts}"
       elsif postgresql?
-        "#{pgpass} pg_dump #{credentials} #{database} #{dump_cmd_opts}"
+        "#{pgpass} pg_dump #{remote_credentials} #{database} #{dump_cmd_opts}"
       end
     end
 
@@ -113,7 +133,7 @@ module Database
           # Remove all warnings, errors and artefacts produced by bunlder, rails and other useful tools
           #config_content = dirty_config_content.match(/#{DBCONFIG_BEGIN_FLAG}(.*?)#{DBCONFIG_END_FLAG}/m)[1]
           @config = YAML.load_file("config/database.yml")["production"].each_with_object({}) { |(k, v), h| h[k.to_s] = v }
-          puts @config.inspect
+
         end
       end
     end
