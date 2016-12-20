@@ -1,3 +1,4 @@
+require 'active_record'
 module Database
   class Base
     DBCONFIG_BEGIN_FLAG = "__CAPISTRANODB_CONFIG_BEGIN_FLAG__".freeze
@@ -19,7 +20,7 @@ module Database
 
     def credentials
       credential_params = ""
-      username = @config['username'] || @config['user']
+      username = "postgres"
 
       if mysql?
         credential_params << " -u #{username} " if username
@@ -108,10 +109,11 @@ module Database
       puts "Loading remote database config"
       @cap.within @cap.current_path do
         @cap.with rails_env: @cap.fetch(:rails_env) do
-          dirty_config_content = @cap.capture(:rails, "runner \"puts '#{DBCONFIG_BEGIN_FLAG}' + ActiveRecord::Base.connection.instance_variable_get(:@config).to_yaml + '#{DBCONFIG_END_FLAG}'\"", '2>/dev/null')
+          #dirty_config_content = @cap.capture(:rails, "runner \"puts '#{DBCONFIG_BEGIN_FLAG}' + ActiveRecord::Base.connection.instance_variable_get(:@config).to_yaml + '#{DBCONFIG_END_FLAG}'\"", '2>/dev/null')
           # Remove all warnings, errors and artefacts produced by bunlder, rails and other useful tools
-          config_content = dirty_config_content.match(/#{DBCONFIG_BEGIN_FLAG}(.*?)#{DBCONFIG_END_FLAG}/m)[1]
-          @config = YAML.load(config_content).each_with_object({}) { |(k, v), h| h[k.to_s] = v }
+          #config_content = dirty_config_content.match(/#{DBCONFIG_BEGIN_FLAG}(.*?)#{DBCONFIG_END_FLAG}/m)[1]
+          @config = YAML.load_file("config/database.yml")["production"].each_with_object({}) { |(k, v), h| h[k.to_s] = v }
+          puts @config.inspect
         end
       end
     end
