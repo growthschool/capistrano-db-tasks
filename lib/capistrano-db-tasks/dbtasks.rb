@@ -6,7 +6,7 @@ require File.expand_path("#{File.dirname(__FILE__)}/compressors/bzip2")
 require File.expand_path("#{File.dirname(__FILE__)}/compressors/gzip")
 
 set :local_rails_env, ENV['RAILS_ENV'] || 'development' unless fetch(:local_rails_env)
-set :rails_env, fetch(:stage) || 'production' unless fetch(:rails_env)
+set :rails_env, fetch(:stage) || 'staging' unless fetch(:rails_env)
 set :db_local_clean, false unless fetch(:db_local_clean)
 set :assets_dir, 'system' unless fetch(:assets_dir)
 set :local_assets_dir, 'public' unless fetch(:local_assets_dir)

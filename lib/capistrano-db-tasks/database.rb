@@ -132,7 +132,7 @@ module Database
           #dirty_config_content = @cap.capture(:rails, "runner \"puts '#{DBCONFIG_BEGIN_FLAG}' + ActiveRecord::Base.connection.instance_variable_get(:@config).to_yaml + '#{DBCONFIG_END_FLAG}'\"", '2>/dev/null')
           # Remove all warnings, errors and artefacts produced by bunlder, rails and other useful tools
           #config_content = dirty_config_content.match(/#{DBCONFIG_BEGIN_FLAG}(.*?)#{DBCONFIG_END_FLAG}/m)[1]
-          @config = YAML.load_file("config/database.yml")["production"].each_with_object({}) { |(k, v), h| h[k.to_s] = v }
+          @config = YAML.load_file("config/database.yml")["staging"].each_with_object({}) { |(k, v), h| h[k.to_s] = v }
 
         end
       end
